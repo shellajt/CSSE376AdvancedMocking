@@ -355,7 +355,6 @@ namespace Proshot.CommandClient
         }
 
 
-
         /// <summary>
         /// Disconnect the client from the server and returns true if the client had been disconnected from the server.
         /// </summary>
