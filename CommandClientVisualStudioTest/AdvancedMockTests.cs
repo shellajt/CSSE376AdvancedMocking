@@ -141,7 +141,9 @@ namespace CommandClientVisualStudioTest
             {
                 client.SendCommandToServerUnthreaded(new Command(CommandType.UserExit, IPAddress.Parse("127.0.0.1"), null));
             }
-            catch { }
+            catch {
+                mockSemaphore.Release();
+            }
             mocks.VerifyAll();
 
         }
