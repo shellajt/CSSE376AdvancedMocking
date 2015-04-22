@@ -115,17 +115,34 @@ namespace CommandClientVisualStudioTest
             typeof(CMDClient).GetField("networkStream", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(client, mockStream);
             typeof(CMDClient).GetField("semaphore", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(client, mockSemaphore);
 
-
-
-
             client.SendCommandToServerUnthreaded(new Command(CommandType.UserExit, IPAddress.Parse("127.0.0.1"), null));
             mocks.VerifyAll();
         }
-
+        
         [TestMethod]
         public void TestSemaphoreReleaseOnExceptionalOperation()
         {
-            Assert.Fail("Not yet implemented");
+            System.IO.Stream mockStream = mocks.DynamicMock<System.IO.Stream>();
+            System.Threading.Semaphore mockSemaphore = null;
+            mockSemaphore = mocks.DynamicMock<System.Threading.Semaphore>();
+
+            using (mocks.Ordered())
+            {
+                Expect.Call(mockSemaphore.WaitOne()).Return(true);               
+                mockStream.Flush();
+                Expect.Call(mockSemaphore.Release()).Return(1);
+                LastCall.On(mockStream).Throw(new ArgumentException());
+            }
+            mocks.ReplayAll();
+            CMDClient client = new CMDClient(null, "Bogus network name");
+            typeof(CMDClient).GetField("networkStream", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(client, mockStream);
+            typeof(CMDClient).GetField("semaphore", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(client, mockSemaphore);
+            try
+            {
+                client.SendCommandToServerUnthreaded(new Command(CommandType.UserExit, IPAddress.Parse("127.0.0.1"), null));
+            }
+            catch { }
+            mocks.VerifyAll();
 
         }
     }
